@@ -35,7 +35,7 @@ def feeling_lucky():
     return redirect("https://github.com/Om-Mishra7/gibble", code=302)
 
 if __name__ == "__main__":
-    app.run(port=50032, debug=True)
+    app.run()
     
     
     
