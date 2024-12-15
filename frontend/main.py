@@ -1,8 +1,8 @@
 # Make a simple Flask app that serves the frontend
 
 import datetime
-from flask import Flask, render_template, make_response, redirect, request
-from database import Database
+from flask import Flask, render_template, redirect, request
+from frontend.database import Database
 
 
 app = Flask(__name__)
