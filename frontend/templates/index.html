@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gibble</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 40px);
+      padding: 20px;
+      background-color: #030303;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+    }
+
+    .hero__content {
+      text-align: center;
+    }
+
+    .hero__title {
+      font-size: 3rem;
+      font-weight: 400;
+      color: #FFF;
+    }
+
+    .hero__description {
+      font-size: .9rem;
+      font-weight: 400;
+      color: #FFF;
+      margin-bottom: 20px;
+    }
+
+    form {
+      margin-top: 20px;
+      font: inherit;
+      color: #000;
+    }
+
+    input {
+      width: 400px;
+      padding: 10px;
+      border: 1px solid #030303;
+      border-radius: 5px;
+      font-size: 1rem !important;
+      font: inherit;
+      color: #000 !important;
+      font-weight: 400 !important;
+    }
+
+    input::placeholder {
+      color: #000;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    input:focus-visible {
+      outline: none;
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    .hero__buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      font-size: .9rem;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font: inherit;
+      color: #000;
+      background-color: #FFF;
+      font-weight: 400;
+    }
+
+    @media (max-width: 600px) {
+      .hero__title {
+        font-size: 2rem;
+      }
+
+      .hero__description {
+        font-size: 1rem;
+      }
+
+      input {
+        font-size: 0.8rem;
+      }
+
+      button {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main>
+    <section class="hero">
+      <div class="hero__content">
+        <h1 class="hero__title">Gibble</h1>
+        <p class="hero__description">Making search harder and longer since 2024</p>
+        <form action="/search" method="GET">
+          <input type="text" name="query" placeholder="What would you like to know?" required autofocus />
+          <section class="hero__buttons">
+            <button type="submit" onclick="if (document.querySelector('input').value === '') { return false; }">Gibble
+              It</button>
+            <button type="button" onclick="window.location.href = 'https://github.com/Om-Mishra7/gibble';">I'm Feeling
+              Lucky</button>
+          </section>
+        </form>
+      </div>
+    </section>
+  </main>
+
+
+</body>
+
+</html>
