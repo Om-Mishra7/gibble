@@ -120,7 +120,7 @@
 
     .search-result h3 {
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 400;
       color: #FFF;
     }
 
@@ -131,7 +131,6 @@
     }
 
     .search-result p:nth-child(2) {
-      font-style: italic;
       font-size: .7rem;
       margin-bottom: 5px;
     }
@@ -142,6 +141,22 @@
       color: #FFF;
       margin-bottom: 10px;
     }
+
+    .fade-text {
+
+      background: linear-gradient(to right, transparent 50%, currentColor 50%);
+      /* Adjust 50% to control fade point */
+
+      background-clip: text;
+
+      -webkit-background-clip: text;
+      /* For older Webkit browsers */
+
+      color: transparent;
+      /* Ensures text color is taken from the gradient */
+
+    }
+
 
     @media (max-width: 600px) {
       .hero__title {
@@ -178,15 +193,16 @@
     </section>
     <section class=" search-results">
       <h2>These are the results for "{{ query }}"</h2>
-      <p class="search-results__count">Found {{ results|length }} results in {{human_readable_time_interval_seconds}}
+      <p class="search-results__count">Found {{ results|length }} results in {{ human_readable_time_interval_seconds |
+        round(2) }}
         seconds</p>
       <ul>
         {% for result in results %}
         <li>
           <section class="search-result" onclick="window.location.href='{{ result.url }}'">
             <h3>{{ result.title }}</h3>
-            <p>{{ result.url }}</p>
-            <p>{{ result.description }}</p>
+            <p>{{ result.url.split('/')[2] }} | {{result.added_at}}</p>
+            <p class="fade-text">{{ result.description[:150] }}...</p>
           </section>
         </li>
         {% endfor %}

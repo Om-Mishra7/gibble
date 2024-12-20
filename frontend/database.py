@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
 import heapq
+import datetime
 
 
 class Database:
@@ -91,15 +92,16 @@ class Database:
 
                 for url, score in sorted_urls:
                     cursor.execute("""
-                        SELECT metadata->>'page_title' as title, metadata->>'page_description' as description
+                        SELECT metadata->>'page_title' as title, metadata->>'page_description' as description, added_at
                         FROM pages WHERE url = %s;
                     """, (url,))
                     page = cursor.fetchone()
                     if page:
                         result_array.append({
-                            "url": url,
+                            "url": url.strip().split("?")[0].split("#")[0],
                             "title": page['title'] if page['title'] else "No Title",
                             "description": page['description'] if page['description'] else "No Description",
+                            "added_at": page['added_at'].strftime("%Y-%m-%d"),
                             "score": score
                         })
 
