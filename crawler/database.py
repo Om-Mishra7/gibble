@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
 import json
-from datetime import datetime
 
 class Database:
     def __init__(self):
@@ -18,6 +17,7 @@ class Database:
         self.construct_schema()
 
     def get_connection(self, db_name, db_host, db_password, db_port, db_user):
+        """Establish a database connection."""
         try:
             connection = psycopg2.connect(
                 dbname=db_name,
@@ -30,9 +30,10 @@ class Database:
             return connection
         except Exception as error:
             print(f"Error connecting to the database: {error}")
-            raise error
+            raise
 
     def ensure_connection(self):
+        """Ensure the database connection is active."""
         try:
             self.connection.cursor().execute("SELECT 1")
         except (Exception, psycopg2.OperationalError):
@@ -46,34 +47,33 @@ class Database:
             )
 
     def construct_schema(self):
-        """Create the database schema if it doesn't already exist."""
+        """Create or update the database schema."""
         try:
             with self.connection.cursor() as cursor:
-
-                # # Drop tables if they exist
-
-                # cursor.execute("""
-                # DROP TABLE IF EXISTS urls, pages;
-                # """)
-
-                # # Commit the changes
+                # Drop tables if they exist (development use case)
+                # cursor.execute("DROP TABLE IF EXISTS urls, pages;")
                 # self.connection.commit()
 
+                # Create tables with indexes
                 cursor.execute("""
                 CREATE TABLE IF NOT EXISTS urls (
-                    id SERIAL PRIMARY KEY,
-                    url TEXT UNIQUE NOT NULL,
+                    url TEXT UNIQUE NOT NULL PRIMARY KEY CHECK (url <> ''),
                     crawled BOOLEAN DEFAULT FALSE,
                     added_at TIMESTAMP DEFAULT NOW()
                 );
 
+                CREATE INDEX IF NOT EXISTS idx_urls_crawled ON urls (crawled);
+                CREATE INDEX IF NOT EXISTS idx_urls_added_at ON urls (added_at);
+
                 CREATE TABLE IF NOT EXISTS pages (
-                    id SERIAL PRIMARY KEY,
-                    url TEXT UNIQUE NOT NULL,
+                    url TEXT UNIQUE NOT NULL PRIMARY KEY CHECK (url <> ''),
                     metadata JSONB,
                     content JSONB,
-                    added_at TIMESTAMP DEFAULT NOW()
+                    added_at TIMESTAMP DEFAULT NOW(),
+                    indexed BOOLEAN DEFAULT FALSE
                 );
+
+                CREATE INDEX IF NOT EXISTS idx_pages_added_at ON pages (added_at);
                 """)
                 self.connection.commit()
         except Exception as error:
@@ -81,15 +81,18 @@ class Database:
             self.connection.rollback()
 
     def insert_url(self, urls):
-        """Insert a list of URLs into the queue."""
+        """Insert a list of URLs into the database."""
         try:
             with self.connection.cursor() as cursor:
-                for url in urls:
-                    cursor.execute("""
+                psycopg2.extras.execute_batch(
+                    cursor,
+                    """
                     INSERT INTO urls (url) 
                     VALUES (%s) 
                     ON CONFLICT (url) DO NOTHING;
-                    """, (url,))
+                    """,
+                    [(url,) for url in urls]
+                )
                 self.connection.commit()
         except Exception as error:
             print(f"Error inserting URLs: {error}")

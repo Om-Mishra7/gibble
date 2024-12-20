@@ -25,6 +25,25 @@ class GibbleCrawler:
             "total_urls": 0
         }
 
+    def filter_outbound_links(self, links):
+        """
+        Filters outbound links to:
+        1. Exclude all *.wikipedia.org domains except en.wikipedia.org.
+        """
+        filtered_links = []
+        
+        for link in links:
+            parsed_link = urlparse(link)
+            link_netloc = parsed_link.netloc
+
+            # Exclude links from *.wikipedia.org unless they are en.wikipedia.org
+            if link_netloc.endswith("wikipedia.org") and not link_netloc.startswith("en.wikipedia.org"):
+                continue
+
+            filtered_links.append(link)
+
+        return filtered_links
+
     def crawl(self, url):
         """Crawl a single URL and extract information."""
         self.stats["total_urls"] += 1
@@ -39,12 +58,18 @@ class GibbleCrawler:
 
             # Extract metadata and content
             parsed_page = self._parse_page(soup, canonical_url)
-            outbound_links = self._extract_outbound_links(soup, url)
+            outbound_links = self.filter_outbound_links(self._extract_outbound_links(soup, url))
 
             # Insert into the database
-            self.db.insert_page(canonical_url, parsed_page)
+            if len(parsed_page["page_content"]["page_text"]) > 500:
+                self.db.insert_page(canonical_url, parsed_page)
+                self.stats["total_urls_crawled"] += 1
+            else:
+                self.stats["total_urls_skipped"] += 1
+            # self.db.insert_outbound_links(outbound_links)
+            # self.stats["total_urls_queued"] += len(outbound_links)
 
-            self.stats["total_urls_crawled"] += 1
+
 
         except Exception as error:
             self.stats["total_urls_failed"] += 1
@@ -72,18 +97,18 @@ class GibbleCrawler:
         """Extract page metadata and content."""
         page_title = soup.title.string if soup.title else "No title"
         page_description = soup.find("meta", property="og:description")
-        page_description = page_description["content"] if page_description else "No description"
-        page_outbound_links = self._extract_outbound_links(soup, canonical_url)
+        page_content = soup.get_text().strip().replace("\n", " ").replace("\r", " ").replace("\t", " ").replace("(", " ").replace(")", " ").replace("[", " ").replace("]", " ").replace("{", " ").replace("}", " ").replace("  ", " ")
+
+        page_description = page_description["content"] if page_description else page_content[:200]
 
         return {
             "page_metadata": {
                 "canonical_url": canonical_url,
                 "page_title": page_title,
-                "page_description": page_description
+                "page_description": " ".join([word for word in page_description.split(" ") if word.strip()][:200]),
             },
             "page_content": {
-                "page_text": soup.get_text().strip(),
-                "page_outbound_links": page_outbound_links
+                "page_text": page_content,
             }
         }
 
@@ -112,7 +137,6 @@ class GibbleCrawler:
 
             links.add(full_url)
 
-        self.stats["total_urls_queued"] += len(links)
         return list(links)
 
     def _display_stats(self):
