@@ -2,7 +2,7 @@
 
 import datetime
 from flask import Flask, render_template, redirect, request
-from frontend.database import Database
+from database import Database
 
 
 app = Flask(__name__)
@@ -35,6 +35,6 @@ def feeling_lucky():
     return redirect("https://github.com/Om-Mishra7/gibble", code=302)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=8080)
     
     

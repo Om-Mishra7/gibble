@@ -3,6 +3,7 @@ import logging
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
+import heapq
 
 
 class Database:
@@ -74,22 +75,23 @@ class Database:
                 # Step 2: Partial match search
                 for word in query_words:
                     cursor.execute("""
-                        SELECT word, urls FROM reverse_index WHERE word LIKE %s;
-                    """, (f"%{word}%",))
+                        SELECT word, urls FROM reverse_index WHERE word LIKE %s LIMIT 100;
+                    """, (f"%{word}%",))  # Limit the results for partial match
                     results = cursor.fetchall()
                     for row in results:
                         urls = row['urls']
                         for url in urls:
                             url_scores[url] = url_scores.get(url, 0) + 0.5  # Partial matches get lower weight
 
-                # Step 3: Sort URLs by score in descending order
-                sorted_urls = sorted(url_scores.items(), key=lambda x: x[1], reverse=True)
+                # Step 3: Sort URLs by score in descending order (only take top 100)
+                sorted_urls = heapq.nlargest(100, url_scores.items(), key=lambda x: x[1])
 
                 # Step 4: Fetch titles and descriptions for top URLs
                 result_array = []
+
                 for url, score in sorted_urls:
                     cursor.execute("""
-                        SELECT metadata->>'title' AS title, metadata->>'description' AS description 
+                        SELECT metadata->>'page_title' as title, metadata->>'page_description' as description
                         FROM pages WHERE url = %s;
                     """, (url,))
                     page = cursor.fetchone()

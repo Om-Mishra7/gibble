@@ -125,14 +125,14 @@
     }
 
     .search-result p {
-      font-size: 1rem;
+      font-size: .8rem;
       font-weight: 400;
       color: #FFF;
     }
 
     .search-result p:nth-child(2) {
       font-style: italic;
-      font-size: .8rem;
+      font-size: .7rem;
       margin-bottom: 5px;
     }
 
@@ -169,7 +169,7 @@
   <main>
     <section class="hero">
       <div class="hero__content">
-        <h1 class="hero__title">Gibble</h1>
+        <h1 class="hero__title" onclick="window.location.href='/'">Gibble</h1>
         <form action="/search" method="GET">
           <input type="text" name="query" placeholder="What would you like to know?" required autofocus
             value="{{ query }}">
